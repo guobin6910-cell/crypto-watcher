@@ -7,6 +7,7 @@ const links = [
   { href: "/", label: "觀測看板" },
   { href: "/portfolio", label: "虛擬倉" },
   { href: "/bot", label: "模擬機器人" },
+  { href: "/futures-bot", label: "模擬合約" },
   { href: "/daily", label: "今日觀察" },
 ] as const;
 
@@ -26,14 +27,14 @@ export function Nav() {
           <span className="hidden sm:inline">幣市觀測＋虛擬倉</span>
           <span className="sm:hidden">幣市觀測</span>
         </Link>
-        <nav className="flex items-center gap-1 text-sm">
+        <nav className="flex flex-wrap items-center justify-end gap-1 text-sm">
           {links.map((l) => {
             const active = pathname === l.href;
             return (
               <Link
                 key={l.href}
                 href={l.href}
-                className={`rounded-lg px-3 py-1.5 transition ${
+                className={`rounded-lg px-2.5 py-1.5 transition sm:px-3 ${
                   active
                     ? "bg-zinc-800 text-amber-200"
                     : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"

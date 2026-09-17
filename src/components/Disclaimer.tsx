@@ -2,7 +2,7 @@ export function Disclaimer({ compact = false }: { compact?: boolean }) {
   if (compact) {
     return (
       <p className="text-xs text-zinc-500">
-        即時標記優先幣安公開 API，失敗時改用 CoinGecko 公開市價；虛擬倉僅存本機。本站內容
+        即時標記優先幣安公開 API，失敗時改用 CoinGecko 公開市價；虛擬倉與模擬合約僅存本機。本站內容
         <strong className="font-medium text-zinc-400">非投資建議</strong>。
       </p>
     );
@@ -15,13 +15,13 @@ export function Disclaimer({ compact = false }: { compact?: boolean }) {
           瀏覽器直接呼叫幣安公開 REST；若 CORS／地區限制失敗，改以 CoinGecko
           公開市價作為 USDT 對映標記。無 API 金鑰、無真實下單。
         </li>
-        <li>虛擬倉資料儲存在瀏覽器 localStorage，清除瀏覽資料即消失。</li>
+        <li>虛擬倉與模擬合約資料儲存在瀏覽器 localStorage，清除瀏覽資料即消失。</li>
         <li>
           評分、「今日觀察」與模擬機器人規則為啟發式，
           <strong>非投資建議</strong>
           ，不構成任何買賣推薦。
         </li>
-        <li>模擬機器人僅在頁面開啟時輪詢，無真實下單。</li>
+        <li>模擬現貨／合約機器人僅在頁面開啟時輪詢；槓桿可能模擬爆倉，無真實下單。</li>
       </ul>
     </aside>
   );
