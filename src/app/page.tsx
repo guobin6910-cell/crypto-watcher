@@ -4,7 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { RefreshButton } from "@/components/RefreshButton";
 import { TickerCard } from "@/components/TickerCard";
-import { fetchTickers24hr } from "@/lib/binance";
+import {
+  fetchTickers24hr,
+  getLastMarketSource,
+  marketSourceLabel,
+  type MarketDataSource,
+} from "@/lib/binance";
 import { filterUsdtSpot, scoreTicker } from "@/lib/scoring";
 import type { FilterMode, ScoredTicker } from "@/lib/types";
 
@@ -22,6 +27,7 @@ export default function WatchboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [source, setSource] = useState<MarketDataSource | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,6 +36,7 @@ export default function WatchboardPage() {
       const raw = await fetchTickers24hr();
       const usdt = filterUsdtSpot(raw);
       setScored(usdt.map(scoreTicker));
+      setSource(getLastMarketSource());
       setUpdatedAt(new Date().toLocaleString("zh-TW", { hour12: false }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "載入失敗");
@@ -74,7 +81,7 @@ export default function WatchboardPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-50">觀測看板</h1>
           <p className="mt-1 text-sm text-zinc-400">
-            幣安公開 24 小時行情 · USDT 現貨交易對
+            {marketSourceLabel(source)} · USDT 現貨對映
             {updatedAt && (
               <span className="ml-2 text-zinc-600">更新於 {updatedAt}</span>
             )}

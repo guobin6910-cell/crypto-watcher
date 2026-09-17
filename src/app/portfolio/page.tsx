@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { RefreshButton } from "@/components/RefreshButton";
-import { fetchTickers24hr, priceMap } from "@/lib/binance";
+import {
+  fetchTickers24hr,
+  getLastMarketSource,
+  marketSourceLabel,
+  priceMap,
+  type MarketDataSource,
+} from "@/lib/binance";
 import {
   DEFAULT_CASH,
   buy,
@@ -23,6 +29,7 @@ export default function PortfolioPage() {
   const [loadingPx, setLoadingPx] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [source, setSource] = useState<MarketDataSource | null>(null);
 
   const [symbol, setSymbol] = useState("BTCUSDT");
   const [qty, setQty] = useState("0.01");
@@ -41,6 +48,7 @@ export default function PortfolioPage() {
       const tickers = await fetchTickers24hr();
       const map = priceMap(tickers);
       setPrices(map);
+      setSource(getLastMarketSource());
       const usdt = Object.keys(map)
         .filter((s) => s.endsWith("USDT") && !s.includes("_"))
         .sort();
@@ -167,7 +175,7 @@ export default function PortfolioPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">虛擬倉</h1>
           <p className="mt-1 text-sm text-zinc-400">
-            以幣安公開最新價模擬現貨 USDT 買賣 · 資料僅存本機
+            以{marketSourceLabel(source)}模擬現貨 USDT 買賣 · 資料僅存本機
           </p>
         </div>
         <RefreshButton onClick={() => void loadPrices()} loading={loadingPx} />

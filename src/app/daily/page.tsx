@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Disclaimer } from "@/components/Disclaimer";
 import { RefreshButton } from "@/components/RefreshButton";
-import { fetchTickers24hr } from "@/lib/binance";
+import {
+  fetchTickers24hr,
+  getLastMarketSource,
+  marketSourceLabel,
+  type MarketDataSource,
+} from "@/lib/binance";
 import {
   buildDailyWatchlist,
   filterUsdtSpot,
@@ -19,6 +24,7 @@ export default function DailyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [source, setSource] = useState<MarketDataSource | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -27,6 +33,7 @@ export default function DailyPage() {
       const raw = await fetchTickers24hr();
       const scored = filterUsdtSpot(raw).map(scoreTicker);
       setItems(buildDailyWatchlist(scored, 12));
+      setSource(getLastMarketSource());
       setUpdatedAt(new Date().toLocaleString("zh-TW", { hour12: false }));
     } catch (e) {
       setError(e instanceof Error ? e.message : "載入失敗");
@@ -45,7 +52,7 @@ export default function DailyPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">今日觀察</h1>
           <p className="mt-1 text-sm text-zinc-400">
-            依漲幅、量能、迷因關鍵字與綜合分數排序的候選名單
+            依漲幅、量能、迷因關鍵字與綜合分數排序 · {marketSourceLabel(source)}
             {updatedAt && (
               <span className="ml-2 text-zinc-600">更新於 {updatedAt}</span>
             )}

@@ -9,8 +9,13 @@ const links = [
   { href: "/daily", label: "今日觀察" },
 ] as const;
 
+function normalizePath(pathname: string): string {
+  if (!pathname || pathname === "/") return "/";
+  return pathname.replace(/\/$/, "") || "/";
+}
+
 export function Nav() {
-  const pathname = usePathname();
+  const pathname = normalizePath(usePathname());
 
   return (
     <header className="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur">
