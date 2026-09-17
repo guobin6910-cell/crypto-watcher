@@ -1,69 +1,137 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Disclaimer } from "@/components/Disclaimer";
+import { RefreshButton } from "@/components/RefreshButton";
+import { TickerCard } from "@/components/TickerCard";
+import { fetchTickers24hr } from "@/lib/binance";
+import { filterUsdtSpot, scoreTicker } from "@/lib/scoring";
+import type { FilterMode, ScoredTicker } from "@/lib/types";
+
+const FILTERS: { id: FilterMode; label: string }[] = [
+  { id: "all", label: "全部" },
+  { id: "meme", label: "熱門迷因" },
+  { id: "gainers", label: "漲幅" },
+  { id: "volume", label: "量能" },
+];
+
+export default function WatchboardPage() {
+  const [scored, setScored] = useState<ScoredTicker[]>([]);
+  const [filter, setFilter] = useState<FilterMode>("all");
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const raw = await fetchTickers24hr();
+      const usdt = filterUsdtSpot(raw);
+      setScored(usdt.map(scoreTicker));
+      setUpdatedAt(new Date().toLocaleString("zh-TW", { hour12: false }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "載入失敗");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const visible = useMemo(() => {
+    let list = scored;
+    if (filter === "meme") {
+      list = list.filter((t) => t.isMeme);
+    } else if (filter === "gainers") {
+      list = [...list].sort(
+        (a, b) => parseFloat(b.priceChangePercent) - parseFloat(a.priceChangePercent)
+      );
+    } else if (filter === "volume") {
+      list = [...list].sort(
+        (a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume)
+      );
+    } else {
+      list = [...list].sort((a, b) => b.score - a.score);
+    }
+
+    const query = q.trim().toUpperCase();
+    if (query) {
+      list = list.filter(
+        (t) => t.symbol.includes(query) || t.baseAsset.includes(query)
+      );
+    }
+
+    return list.slice(0, filter === "all" && !query ? 60 : 120);
+  }, [scored, filter, q]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-50">觀測看板</h1>
+          <p className="mt-1 text-sm text-zinc-400">
+            幣安公開 24 小時行情 · USDT 現貨交易對
+            {updatedAt && (
+              <span className="ml-2 text-zinc-600">更新於 {updatedAt}</span>
+            )}
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <RefreshButton onClick={() => void load()} loading={loading} />
+      </div>
+
+      <Disclaimer />
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setFilter(f.id)}
+              className={`rounded-full px-3 py-1 text-sm transition ${
+                filter === f.id
+                  ? "bg-amber-400/20 text-amber-200 ring-1 ring-amber-400/40"
+                  : "bg-zinc-900 text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
-      </main>
+        <input
+          type="search"
+          placeholder="搜尋幣種，例如 BTC"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="w-full rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 outline-none focus:border-amber-500/50 sm:w-56"
+        />
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+          {error}
+        </div>
+      )}
+
+      {loading && scored.length === 0 ? (
+        <p className="text-center text-zinc-500 py-16">載入行情中…</p>
+      ) : (
+        <>
+          <p className="text-xs text-zinc-500">顯示 {visible.length} 筆</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map((t) => (
+              <TickerCard key={t.symbol} ticker={t} />
+            ))}
+          </div>
+          {visible.length === 0 && (
+            <p className="py-12 text-center text-zinc-500">沒有符合條件的交易對</p>
+          )}
+        </>
+      )}
     </div>
   );
 }
