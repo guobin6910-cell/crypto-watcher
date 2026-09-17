@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/", label: "觀測看板" },
   { href: "/portfolio", label: "虛擬倉" },
+  { href: "/bot", label: "模擬機器人" },
   { href: "/daily", label: "今日觀察" },
 ] as const;
 

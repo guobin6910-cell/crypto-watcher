@@ -379,6 +379,15 @@ export default function PortfolioPage() {
                     {h.side === "buy" ? "買" : "賣"}
                   </span>{" "}
                   {h.symbol} · {h.qty} @ {formatPrice(h.price)}
+                  {h.source === "bot" ? (
+                    <span className="ml-2 rounded bg-violet-500/20 px-1.5 py-0.5 text-[10px] text-violet-200">
+                      bot
+                    </span>
+                  ) : (
+                    <span className="ml-2 rounded bg-zinc-700/60 px-1.5 py-0.5 text-[10px] text-zinc-400">
+                      手動
+                    </span>
+                  )}
                 </span>
                 <span className="font-mono text-zinc-400">
                   {formatPrice(h.usdt)} USDT ·{" "}

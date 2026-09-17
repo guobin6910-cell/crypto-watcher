@@ -47,6 +47,8 @@ export interface Position {
   avgPrice: number;
 }
 
+export type TradeSource = "bot" | "manual";
+
 export interface TradeRecord {
   id: string;
   symbol: string;
@@ -55,6 +57,8 @@ export interface TradeRecord {
   price: number;
   usdt: number;
   at: string; // ISO
+  /** 來源：機器人自動成交或手動；舊資料可能缺省 */
+  source?: TradeSource;
 }
 
 export interface PortfolioState {
@@ -69,4 +73,28 @@ export interface DailyCandidate {
   ticker: ScoredTicker;
   rank: number;
   reasons: string[];
+}
+
+export type BotUniverse = "watchlist" | "top_volume" | "meme_keywords";
+
+export interface BotSettings {
+  startingCapitalUSDT: number;
+  maxPositionPct: number;
+  maxOpenPositions: number;
+  pollIntervalSec: number;
+  takeProfitPct: number;
+  stopLossPct: number;
+  entryThresholdPct: number;
+  universe: BotUniverse;
+  /** 24h 漲幅 ≤ −entryThreshold 時出場 */
+  exitOnReverse: boolean;
+  enabled: boolean;
+}
+
+export interface BotStatus {
+  lastRunAt: string | null;
+  lastSignal: string | null;
+  lastError: string | null;
+  dataSource: "binance" | "coingecko" | null;
+  running: boolean;
 }

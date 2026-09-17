@@ -1,6 +1,6 @@
 "use client";
 
-import type { PortfolioState, Position, TradeRecord } from "./types";
+import type { PortfolioState, Position, TradeRecord, TradeSource } from "./types";
 
 const STORAGE_KEY = "crypto-watcher-portfolio-v1";
 export const DEFAULT_CASH = 10_000;
@@ -49,7 +49,8 @@ export function buy(
   state: PortfolioState,
   symbol: string,
   qty: number,
-  price: number
+  price: number,
+  source: TradeSource = "manual"
 ): { ok: true; state: PortfolioState } | { ok: false; error: string } {
   if (!symbol.endsWith("USDT")) {
     return { ok: false, error: "僅支援現貨 USDT 交易對" };
@@ -81,6 +82,7 @@ export function buy(
     price,
     usdt: cost,
     at: new Date().toISOString(),
+    source,
   };
 
   return {
@@ -99,7 +101,8 @@ export function sell(
   state: PortfolioState,
   symbol: string,
   qty: number,
-  price: number
+  price: number,
+  source: TradeSource = "manual"
 ): { ok: true; state: PortfolioState } | { ok: false; error: string } {
   if (!(qty > 0) || !(price > 0)) {
     return { ok: false, error: "數量與價格必須大於 0" };
@@ -130,6 +133,7 @@ export function sell(
     price,
     usdt: proceeds,
     at: new Date().toISOString(),
+    source,
   };
 
   return {

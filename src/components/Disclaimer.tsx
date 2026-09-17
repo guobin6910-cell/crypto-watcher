@@ -17,10 +17,11 @@ export function Disclaimer({ compact = false }: { compact?: boolean }) {
         </li>
         <li>虛擬倉資料儲存在瀏覽器 localStorage，清除瀏覽資料即消失。</li>
         <li>
-          評分與「今日觀察」為啟發式規則，
+          評分、「今日觀察」與模擬機器人規則為啟發式，
           <strong>非投資建議</strong>
           ，不構成任何買賣推薦。
         </li>
+        <li>模擬機器人僅在頁面開啟時輪詢，無真實下單。</li>
       </ul>
     </aside>
   );
