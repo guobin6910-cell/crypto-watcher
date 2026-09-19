@@ -9,6 +9,7 @@ const links = [
   { href: "/bot", label: "模擬機器人" },
   { href: "/futures-bot", label: "模擬合約" },
   { href: "/daily", label: "今日觀察" },
+  { href: "/tw-picks", label: "台股三檔" },
 ] as const;
 
 function normalizePath(pathname: string): string {
