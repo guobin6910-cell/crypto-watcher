@@ -11,6 +11,7 @@ const links = [
   { href: "/daily", label: "今日觀察" },
   { href: "/tw-picks", label: "台股三檔" },
   { href: "/arb", label: "價差掃描" },
+  { href: "/research", label: "研究分析" },
 ] as const;
 
 function normalizePath(pathname: string): string {
